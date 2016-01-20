@@ -10,7 +10,7 @@ int main()
 engine::engine()
 {
     window.create(sf::VideoMode(640, 640), "EinsteinMan", sf::Style::Titlebar | sf::Style::Close);
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(120);
 
     if(!mapTexture.loadFromFile("map.png"))
     {
@@ -24,8 +24,10 @@ engine::engine()
         window.close();
     }
 
+    arrived = true;
+
     einsteinSprite.setTexture(einsteinTexture);
-    einsteinSprite.setPosition(sf::Vector2f(255, 320));
+    einsteinSprite.setPosition(sf::Vector2f(256, 320));
 
     sf::FloatRect boundingBox;
     boundingBox.top = 0;
@@ -124,33 +126,44 @@ void engine::gameLoop()
 
 void engine::checkInputs()
 {
-    int x = 0;
-    int y = 0;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    if(arrived)
     {
-        einsteinSprite.move(sf::Vector2f(-3, 0));
-        x = -3;
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+        {
+            currentMoveX = -1;
+            arrived = false;
+        }
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        {
+            currentMoveX = 1;
+            arrived = false;
+        }
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+        {
+            currentMoveY = -1;
+            arrived = false;
+        }
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+        {
+            currentMoveY = 1;
+            arrived = false;
+        }
     }
-    else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    else
     {
-        einsteinSprite.move(sf::Vector2f(3, 0));
-        x = 3;
-    }
-    else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-    {
-        einsteinSprite.move(sf::Vector2f(0, -3));
-        y = -3;
-    }
-    else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-    {
-        einsteinSprite.move(sf::Vector2f(0, 3));
-        y = 3;
-    }
+        einsteinSprite.move(sf::Vector2f(currentMoveX, currentMoveY));
+        resolveCollisions(currentMoveX, currentMoveY);
 
-    resolveCollisions(x, y);
+        if((int)einsteinSprite.getPosition().x % 64 == 0 && (int)einsteinSprite.getPosition().y % 64 == 0)
+        {
+            arrived = true;
+            currentMoveX = 0;
+            currentMoveY = 0;
+        }
+    }
 }
 
-void engine::resolveCollisions(int x, int y)
+bool engine::resolveCollisions(int x, int y)
 {
     sf::FloatRect einstein = einsteinSprite.getGlobalBounds();
     for(std::vector<sf::FloatRect>::iterator it = maze.begin(); it != maze.end(); ++it)
@@ -158,8 +171,11 @@ void engine::resolveCollisions(int x, int y)
         if((*it).intersects(einstein))
         {
             einsteinSprite.move(-x, -y);
+            return true;
         }
     }
+
+    return false;
 }
 
 void engine::render()

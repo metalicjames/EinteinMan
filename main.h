@@ -23,7 +23,10 @@ class engine
         sf::Sprite mapSprite;
         sf::Texture einsteinTexture;
         sf::Sprite einsteinSprite;
-        void resolveCollisions(int x, int y);
+        bool resolveCollisions(int x, int y);
+        bool arrived;
+        int currentMoveX;
+        int currentMoveY;
 
 };
 
