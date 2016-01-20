@@ -27,6 +27,10 @@ class engine
         bool arrived;
         int currentMoveX;
         int currentMoveY;
+        std::vector<sf::CircleShape> points;
+        void populateMap();
+        unsigned int score;
+        sf::Font font;
 
 };
 

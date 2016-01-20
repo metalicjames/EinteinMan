@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "main.h"
 
 int main()
@@ -24,11 +26,24 @@ engine::engine()
         window.close();
     }
 
+    if(!font.loadFromFile("Inconsolata.otf"))
+    {
+        window.close();
+    }
+
     arrived = true;
+    score = 0;
 
     einsteinSprite.setTexture(einsteinTexture);
     einsteinSprite.setPosition(sf::Vector2f(256, 320));
 
+    populateMap();
+
+    gameLoop();
+}
+
+void engine::populateMap()
+{
     sf::FloatRect boundingBox;
     boundingBox.top = 0;
     boundingBox.left = 0;
@@ -97,7 +112,134 @@ engine::engine()
     boundingBox.height = 128;
     maze.push_back(boundingBox);
 
-    gameLoop();
+    sf::CircleShape shape(3);
+    shape.setFillColor(sf::Color::White);
+    shape.setPosition(sf::Vector2f(86, 90));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(86, 154));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(86, 218));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(86, 282));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(86, 410));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(86, 474));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(86, 538));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(150, 282));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(150, 346));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(150, 410));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(150, 474));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(214, 90));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(214, 154));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(214, 218));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(214, 282));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(214, 474));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(214, 538));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(278, 282));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(278, 474));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(352, 90));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(352, 154));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(352, 218));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(352, 282));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(352, 474));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(352, 538));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(416, 90));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(416, 154));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(416, 218));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(416, 282));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(416, 346));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(416, 410));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(416, 474));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(416, 538));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(480, 218));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(480, 538));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(554, 90));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(554, 154));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(554, 218));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(554, 282));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(554, 346));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(554, 410));
+    points.push_back(shape);
+
+    shape.setPosition(sf::Vector2f(554, 474));
+    points.push_back(shape);
+
 }
 
 engine::~engine()
@@ -165,17 +307,29 @@ void engine::checkInputs()
 
 bool engine::resolveCollisions(int x, int y)
 {
+    bool returning = false;
     sf::FloatRect einstein = einsteinSprite.getGlobalBounds();
     for(std::vector<sf::FloatRect>::iterator it = maze.begin(); it != maze.end(); ++it)
     {
         if((*it).intersects(einstein))
         {
             einsteinSprite.move(-x, -y);
-            return true;
+            returning = true;
+            break;
         }
     }
 
-    return false;
+    for(std::vector<sf::CircleShape>::iterator it = points.begin(); it != points.end(); ++it)
+    {
+        sf::FloatRect point = (*it).getGlobalBounds();
+        if(einstein.intersects(point))
+        {
+            score++;
+            it = points.erase(it);
+        }
+    }
+
+    return returning;
 }
 
 void engine::render()
@@ -183,7 +337,24 @@ void engine::render()
     window.clear(sf::Color::Black);
 
     window.draw(mapSprite);
+
+    for(std::vector<sf::CircleShape>::iterator it = points.begin(); it != points.end(); ++it)
+    {
+        window.draw(*it);
+    }
+
     window.draw(einsteinSprite);
+
+    sf::Text text;
+    text.setFont(font);
+    std::stringstream scoreStream;
+    scoreStream << "Score: " << score;
+    text.setString(scoreStream.str());
+    text.setCharacterSize(24);
+    text.setColor(sf::Color::White);
+    text.setPosition(sf::Vector2f(520, 600));
+
+    window.draw(text);
 
     window.display();
 }
