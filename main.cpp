@@ -1,5 +1,4 @@
 #include <sstream>
-#include <iostream>
 
 #include "main.h"
 
@@ -20,7 +19,8 @@ engine::engine()
         window.close();
     }
     mapSprite.setTexture(mapTexture);
-    mapSprite.setPosition(sf::Vector2f(0, 0));
+    mapSprite.setPosition(sf::Vector2f(256, 320));
+    mapSprite.setOrigin(sf::Vector2f(256, 320));
 
     if(!einsteinTexture.loadFromFile("einstein.png"))
     {
@@ -40,6 +40,8 @@ engine::engine()
     arrived = true;
     score = 0;
     lives = 3;
+    currentMoveX = 0;
+    currentMoveY = 0;
 
     einsteinSprite.setTexture(einsteinTexture);
     einsteinSprite.setPosition(sf::Vector2f(256, 320));
@@ -279,6 +281,8 @@ void engine::gameLoop()
 
             moveEnemy();
 
+            resolveEnemyCollisions();
+
             render();
         }
         else if(lives == 0 || score == 42)
@@ -347,49 +351,54 @@ void engine::checkInputs()
             arrived = false;
         }
     }
-    else
-    {
-        einsteinSprite.move(sf::Vector2f(currentMoveX, currentMoveY));
 
-        if((int)einsteinSprite.getPosition().x % 64 == 0 && (int)einsteinSprite.getPosition().y % 64 == 0)
-        {
-            arrived = true;
-            currentMoveX = 0;
-            currentMoveY = 0;
-        }
-    }
-
+    einsteinSprite.move(sf::Vector2f(currentMoveX, currentMoveY));
     resolveCollisions(currentMoveX, currentMoveY);
+    if((int)einsteinSprite.getPosition().x % 64 == 0 && (int)einsteinSprite.getPosition().y % 64 == 0)
+    {
+        arrived = true;
+        currentMoveX = 0;
+        currentMoveY = 0;
+    }
 }
 
 bool engine::resolveCollisions(int x, int y)
 {
     bool returning = false;
     sf::FloatRect einstein = einsteinSprite.getGlobalBounds();
-    for(std::vector<sf::FloatRect>::iterator it = maze.begin(); it != maze.end(); ++it)
+    if(!arrived)
     {
-        if((*it).intersects(einstein))
+        for(std::vector<sf::FloatRect>::iterator it = maze.begin(); it != maze.end(); ++it)
         {
-            einsteinSprite.move(-x*2, -y*2);
-            returning = true;
-            break;
-        }
-    }
-
-    for(std::vector<sf::CircleShape>::iterator it = points.begin(); it != points.end(); ++it)
-    {
-        sf::FloatRect point = (*it).getGlobalBounds();
-        if(einstein.intersects(point))
-        {
-            score++;
-            it = points.erase(it);
-            if(it == points.end())
+            if((*it).intersects(einstein))
             {
+                einsteinSprite.move(-x*2, -y*2);
+                returning = true;
                 break;
+            }
+        }
+
+        for(std::vector<sf::CircleShape>::iterator it = points.begin(); it != points.end(); ++it)
+        {
+            sf::FloatRect point = (*it).getGlobalBounds();
+            if(einstein.intersects(point))
+            {
+                score++;
+                it = points.erase(it);
+                if(it == points.end())
+                {
+                    break;
+                }
             }
         }
     }
 
+    return returning;
+}
+
+void engine::resolveEnemyCollisions()
+{
+    sf::FloatRect einstein = einsteinSprite.getGlobalBounds();
     sf::FloatRect enemy = enemySprite.getGlobalBounds();
     if(einstein.intersects(enemy))
     {
@@ -402,23 +411,77 @@ bool engine::resolveCollisions(int x, int y)
         }
         arrived = true;
     }
-
-    return returning;
 }
 
 void engine::render()
 {
     window.clear(sf::Color::Black);
 
+    mapSprite.setOrigin(einsteinSprite.getPosition());
+    mapSprite.setPosition(einsteinSprite.getPosition());
+
+    if(currentMoveX != 0)
+    {
+        mapSprite.setScale(sf::Vector2f(0.87, 1));
+    }
+    else if(currentMoveY != 0)
+    {
+        mapSprite.setScale(sf::Vector2f(1, 0.87));
+    }
+
     window.draw(mapSprite);
+    mapSprite.setScale(sf::Vector2f(1, 1));
 
     for(std::vector<sf::CircleShape>::iterator it = points.begin(); it != points.end(); ++it)
     {
-        window.draw(*it);
+        sf::Vector2f originalPosition = (*it).getPosition();
+        if(currentMoveX != 0)
+        {
+            int distance = einsteinSprite.getPosition().x - (*it).getPosition().x;
+            (*it).setScale(sf::Vector2f(0.87, 1));
+            (*it).move(sf::Vector2f(distance - (distance * 0.87), 0));
+            window.draw(*it);
+            (*it).setPosition(originalPosition);
+        }
+        else if(currentMoveY != 0)
+        {
+            int distance = einsteinSprite.getPosition().y - (*it).getPosition().y;
+            (*it).setScale(sf::Vector2f(1, 0.87));
+            (*it).move(sf::Vector2f(0, distance - (distance * 0.87)));
+            window.draw(*it);
+            (*it).setPosition(originalPosition);
+        }
+        else
+        {
+            window.draw(*it);
+        }
+        (*it).setScale(sf::Vector2f(1, 1));
     }
 
     window.draw(einsteinSprite);
-    window.draw(enemySprite);
+
+    sf::Vector2f originalPosition = enemySprite.getPosition();
+    if(currentMoveX != 0)
+    {
+        enemySprite.setScale(sf::Vector2f(0.87, 1));
+        int distance = einsteinSprite.getPosition().x - enemySprite.getPosition().x;
+        enemySprite.move(sf::Vector2f(distance - (distance * 0.87), 0));
+        window.draw(enemySprite);
+        enemySprite.setPosition(originalPosition);
+    }
+    else if(currentMoveY != 0)
+    {
+        enemySprite.setScale(sf::Vector2f(1, 0.87));
+        int distance = einsteinSprite.getPosition().y - enemySprite.getPosition().y;
+        enemySprite.move(sf::Vector2f(0, distance - (distance * 0.87)));
+        window.draw(enemySprite);
+        enemySprite.setPosition(originalPosition);
+    }
+    else
+    {
+        window.draw(enemySprite);
+    }
+    enemySprite.setScale(sf::Vector2f(1, 1));
 
     sf::Text text;
     text.setFont(font);

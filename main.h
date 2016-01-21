@@ -40,6 +40,7 @@ class engine
         std::queue<MapSearchNode> path;
         int newX;
         int newY;
+        void resolveEnemyCollisions();
 
 };
 
