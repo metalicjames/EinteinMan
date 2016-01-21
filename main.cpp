@@ -40,7 +40,7 @@ engine::engine()
     einsteinSprite.setPosition(sf::Vector2f(256, 320));
 
     enemySprite.setTexture(einsteinTexture);
-    enemySprite.setPosition(sf::Vector2f(190, 118));
+    enemySprite.setPosition(sf::Vector2f(190, 128));
 
     populateMap();
 
@@ -49,6 +49,9 @@ engine::engine()
 
 void engine::populateMap()
 {
+    maze.clear();
+    points.clear();
+
     sf::FloatRect boundingBox;
     boundingBox.top = 0;
     boundingBox.left = 0;
@@ -265,12 +268,41 @@ void engine::gameLoop()
             }
         }
 
-        checkInputs();
+        if(lives > 0)
+        {
+            checkInputs();
 
-        moveEnemy();
+            moveEnemy();
 
-        render();
+            render();
+        }
+        else
+        {
+            window.clear(sf::Color::Black);
 
+            sf::Text text;
+            text.setFont(font);
+            std::stringstream scoreStream;
+            scoreStream << "You Lose! Score: " << score << "\nPress enter to restart";
+            text.setString(scoreStream.str());
+            text.setCharacterSize(24);
+            text.setColor(sf::Color::White);
+            text.setPosition(sf::Vector2f(220, 320));
+
+            window.draw(text);
+
+            window.display();
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
+            {
+                arrived = true;
+                lives = 3;
+                score = 0;
+                populateMap();
+                einsteinSprite.setPosition(sf::Vector2f(256, 320));
+                enemySprite.setPosition(sf::Vector2f(190, 128));
+            }
+        }
     }
 }
 
@@ -302,7 +334,6 @@ void engine::checkInputs()
     else
     {
         einsteinSprite.move(sf::Vector2f(currentMoveX, currentMoveY));
-        resolveCollisions(currentMoveX, currentMoveY);
 
         if((int)einsteinSprite.getPosition().x % 64 == 0 && (int)einsteinSprite.getPosition().y % 64 == 0)
         {
@@ -311,6 +342,8 @@ void engine::checkInputs()
             currentMoveY = 0;
         }
     }
+
+    resolveCollisions(currentMoveX, currentMoveY);
 }
 
 bool engine::resolveCollisions(int x, int y)
@@ -339,6 +372,14 @@ bool engine::resolveCollisions(int x, int y)
                 break;
             }
         }
+    }
+
+    sf::FloatRect enemy = enemySprite.getGlobalBounds();
+    if(einstein.intersects(enemy))
+    {
+        lives--;
+        einsteinSprite.setPosition(sf::Vector2f(256, 320));
+        enemySprite.setPosition(sf::Vector2f(190, 128));
     }
 
     return returning;
