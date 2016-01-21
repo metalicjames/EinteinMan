@@ -27,6 +27,11 @@ engine::engine()
         window.close();
     }
 
+    if(!enemyTexture.loadFromFile("bohr.png"))
+    {
+        window.close();
+    }
+
     if(!font.loadFromFile("Inconsolata.otf"))
     {
         window.close();
@@ -39,8 +44,8 @@ engine::engine()
     einsteinSprite.setTexture(einsteinTexture);
     einsteinSprite.setPosition(sf::Vector2f(256, 320));
 
-    enemySprite.setTexture(einsteinTexture);
-    enemySprite.setPosition(sf::Vector2f(190, 128));
+    enemySprite.setTexture(enemyTexture);
+    enemySprite.setPosition(sf::Vector2f(64, 512));
 
     populateMap();
 
@@ -300,7 +305,11 @@ void engine::gameLoop()
                 score = 0;
                 populateMap();
                 einsteinSprite.setPosition(sf::Vector2f(256, 320));
-                enemySprite.setPosition(sf::Vector2f(190, 128));
+                enemySprite.setPosition(sf::Vector2f(64, 512));
+                while(!path.empty())
+                {
+                    path.pop();
+                }
             }
         }
     }
@@ -354,7 +363,7 @@ bool engine::resolveCollisions(int x, int y)
     {
         if((*it).intersects(einstein))
         {
-            einsteinSprite.move(-x, -y);
+            einsteinSprite.move(-x*2, -y*2);
             returning = true;
             break;
         }
@@ -379,7 +388,12 @@ bool engine::resolveCollisions(int x, int y)
     {
         lives--;
         einsteinSprite.setPosition(sf::Vector2f(256, 320));
-        enemySprite.setPosition(sf::Vector2f(190, 128));
+        enemySprite.setPosition(sf::Vector2f(64, 512));
+        while(!path.empty())
+        {
+            path.pop();
+        }
+        arrived = true;
     }
 
     return returning;

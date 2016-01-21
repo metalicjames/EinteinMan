@@ -35,6 +35,7 @@ class engine
         sf::Font font;
         unsigned int lives;
         void moveEnemy();
+        sf::Texture enemyTexture;
         sf::Sprite enemySprite;
         std::queue<MapSearchNode> path;
         int newX;
