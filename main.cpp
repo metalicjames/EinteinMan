@@ -1,4 +1,5 @@
 #include <sstream>
+#include <iostream>
 
 #include "main.h"
 
@@ -33,9 +34,13 @@ engine::engine()
 
     arrived = true;
     score = 0;
+    lives = 3;
 
     einsteinSprite.setTexture(einsteinTexture);
     einsteinSprite.setPosition(sf::Vector2f(256, 320));
+
+    enemySprite.setTexture(einsteinTexture);
+    enemySprite.setPosition(sf::Vector2f(190, 118));
 
     populateMap();
 
@@ -261,6 +266,9 @@ void engine::gameLoop()
         }
 
         checkInputs();
+
+        moveEnemy();
+
         render();
 
     }
@@ -326,6 +334,10 @@ bool engine::resolveCollisions(int x, int y)
         {
             score++;
             it = points.erase(it);
+            if(it == points.end())
+            {
+                break;
+            }
         }
     }
 
@@ -344,17 +356,111 @@ void engine::render()
     }
 
     window.draw(einsteinSprite);
+    window.draw(enemySprite);
 
     sf::Text text;
     text.setFont(font);
     std::stringstream scoreStream;
-    scoreStream << "Score: " << score;
+    scoreStream << "Lives: " << lives << " Score: " << score;
     text.setString(scoreStream.str());
     text.setCharacterSize(24);
     text.setColor(sf::Color::White);
-    text.setPosition(sf::Vector2f(520, 600));
+    text.setPosition(sf::Vector2f(420, 600));
 
     window.draw(text);
 
     window.display();
+}
+
+void engine::moveEnemy()
+{
+    if(path.empty())
+    {
+        newX = 0;
+        newY = 0;
+        AStarSearch<MapSearchNode> astarsearch;
+
+        // Create a start state
+        MapSearchNode nodeStart;
+        nodeStart.x = static_cast<int>(enemySprite.getPosition().x) / 64;
+        nodeStart.y = static_cast<int>(enemySprite.getPosition().y) / 64;
+
+        // Define the goal state
+        MapSearchNode nodeEnd;
+        nodeEnd.x = static_cast<int>(einsteinSprite.getPosition().x) / 64;
+        nodeEnd.y = static_cast<int>(einsteinSprite.getPosition().y) / 64;
+
+        // Set Start and goal states
+        astarsearch.SetStartAndGoalStates(nodeStart, nodeEnd);
+
+        unsigned int SearchState;
+        do
+        {
+            SearchState = astarsearch.SearchStep();
+        }
+        while(SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SEARCHING);
+
+        if(SearchState == AStarSearch<MapSearchNode>::SEARCH_STATE_SUCCEEDED)
+        {
+            MapSearchNode *node = astarsearch.GetSolutionStart();
+
+            while(true)
+            {
+                path.push(*node);
+
+                node = astarsearch.GetSolutionNext();
+
+                if(!node)
+                {
+                    break;
+                }
+            }
+
+            // Once you're done with the solution you can free the nodes up
+            astarsearch.FreeSolutionNodes();
+        }
+        else
+        {
+            while(!path.empty())
+            {
+                path.pop();
+            }
+        }
+
+        astarsearch.EnsureMemoryFreed();
+    }
+    else
+    {
+        MapSearchNode node = path.front();
+        if(newX == 0 && newY == 0)
+        {
+            newX = node.x * 64;
+            newY = node.y * 64;
+        }
+        else
+        {
+            if(newX < enemySprite.getPosition().x)
+            {
+                enemySprite.move(sf::Vector2f(-0.5, 0));
+            }
+            else if(newX > enemySprite.getPosition().x)
+            {
+                enemySprite.move(sf::Vector2f(0.5, 0));
+            }
+            else if(newY < enemySprite.getPosition().y)
+            {
+                enemySprite.move(sf::Vector2f(0, -0.5));
+            }
+            else if(newY > enemySprite.getPosition().y)
+            {
+                enemySprite.move(sf::Vector2f(0, 0.5));
+            }
+            else
+            {
+                newX = 0;
+                newY = 0;
+                path.pop();
+            }
+        }
+    }
 }

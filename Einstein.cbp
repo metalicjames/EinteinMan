@@ -37,8 +37,11 @@
 			<Add library="SFML-2.3.2\lib\libsfml-system-d.a" />
 			<Add library="SFML-2.3.2\lib\libsfml-window-d.a" />
 		</Linker>
+		<Unit filename="findpath.cpp" />
+		<Unit filename="findpath.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
+		<Unit filename="stlastar.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

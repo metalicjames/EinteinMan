@@ -2,6 +2,9 @@
 #define MAIN_H_INCLUDED
 
 #include <vector>
+#include <queue>
+
+#include "findpath.h"
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
@@ -16,7 +19,6 @@ class engine
         void gameLoop();
         void checkInputs();
         sf::RenderWindow window;
-        class character;
         void render();
         std::vector<sf::FloatRect> maze;
         sf::Texture mapTexture;
@@ -31,6 +33,12 @@ class engine
         void populateMap();
         unsigned int score;
         sf::Font font;
+        unsigned int lives;
+        void moveEnemy();
+        sf::Sprite enemySprite;
+        std::queue<MapSearchNode> path;
+        int newX;
+        int newY;
 
 };
 
