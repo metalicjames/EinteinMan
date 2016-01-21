@@ -461,7 +461,23 @@ void engine::render()
     window.draw(einsteinSprite);
 
     sf::Vector2f originalPosition = enemySprite.getPosition();
-    if(currentMoveX != 0)
+    if((enemyMoveX < 0 && currentMoveX > 0) || (enemyMoveX > 0 && currentMoveX < 0))
+    {
+        enemySprite.setScale(sf::Vector2f(0.20, 1));
+        int distance = einsteinSprite.getPosition().x - enemySprite.getPosition().x;
+        enemySprite.move(sf::Vector2f(distance - (distance * 0.20), 0));
+        window.draw(enemySprite);
+        enemySprite.setPosition(originalPosition);
+    }
+    else if((enemyMoveY < 0 && currentMoveY > 0) || (enemyMoveY > 0 && currentMoveY < 0))
+    {
+        enemySprite.setScale(sf::Vector2f(1, 0.20));
+        int distance = einsteinSprite.getPosition().y - enemySprite.getPosition().y;
+        enemySprite.move(sf::Vector2f(0, distance - (distance * 0.20)));
+        window.draw(enemySprite);
+        enemySprite.setPosition(originalPosition);
+    }
+    else if(currentMoveX == 0 && enemyMoveX != 0)
     {
         enemySprite.setScale(sf::Vector2f(0.87, 1));
         int distance = einsteinSprite.getPosition().x - enemySprite.getPosition().x;
@@ -469,7 +485,7 @@ void engine::render()
         window.draw(enemySprite);
         enemySprite.setPosition(originalPosition);
     }
-    else if(currentMoveY != 0)
+    else if(currentMoveY == 0 && enemyMoveY != 0)
     {
         enemySprite.setScale(sf::Vector2f(1, 0.87));
         int distance = einsteinSprite.getPosition().y - enemySprite.getPosition().y;
@@ -567,18 +583,26 @@ void engine::moveEnemy()
             if(newX < enemySprite.getPosition().x)
             {
                 enemySprite.move(sf::Vector2f(-1, 0));
+                enemyMoveX = -1;
+                enemyMoveY = 0;
             }
             else if(newX > enemySprite.getPosition().x)
             {
                 enemySprite.move(sf::Vector2f(1, 0));
+                enemyMoveX = 1;
+                enemyMoveY = 0;
             }
             else if(newY < enemySprite.getPosition().y)
             {
                 enemySprite.move(sf::Vector2f(0, -1));
+                enemyMoveX = 0;
+                enemyMoveY = -1;
             }
             else if(newY > enemySprite.getPosition().y)
             {
                 enemySprite.move(sf::Vector2f(0, 1));
+                enemyMoveX = 0;
+                enemyMoveY = 1;
             }
             else
             {

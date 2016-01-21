@@ -41,7 +41,8 @@ class engine
         int newX;
         int newY;
         void resolveEnemyCollisions();
-
+        int enemyMoveX;
+        int enemyMoveY;
 };
 
 #endif // MAIN_H_INCLUDED
