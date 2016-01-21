@@ -496,19 +496,19 @@ void engine::moveEnemy()
         {
             if(newX < enemySprite.getPosition().x)
             {
-                enemySprite.move(sf::Vector2f(-0.5, 0));
+                enemySprite.move(sf::Vector2f(-1, 0));
             }
             else if(newX > enemySprite.getPosition().x)
             {
-                enemySprite.move(sf::Vector2f(0.5, 0));
+                enemySprite.move(sf::Vector2f(1, 0));
             }
             else if(newY < enemySprite.getPosition().y)
             {
-                enemySprite.move(sf::Vector2f(0, -0.5));
+                enemySprite.move(sf::Vector2f(0, -1));
             }
             else if(newY > enemySprite.getPosition().y)
             {
-                enemySprite.move(sf::Vector2f(0, 0.5));
+                enemySprite.move(sf::Vector2f(0, 1));
             }
             else
             {
