@@ -281,15 +281,22 @@ void engine::gameLoop()
 
             render();
         }
-        else
+        else if(lives == 0 || score == 42)
         {
             window.clear(sf::Color::Black);
 
             sf::Text text;
             text.setFont(font);
-            std::stringstream scoreStream;
-            scoreStream << "You Lose! Score: " << score << "\nPress enter to restart";
-            text.setString(scoreStream.str());
+            if(score == 42)
+            {
+                text.setString("You Win!\nPress enter to restart");
+            }
+            else
+            {
+                std::stringstream scoreStream;
+                scoreStream << "You Lose! Score: " << score << "\nPress enter to restart";
+                text.setString(scoreStream.str());
+            }
             text.setCharacterSize(24);
             text.setColor(sf::Color::White);
             text.setPosition(sf::Vector2f(220, 320));
