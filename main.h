@@ -4,10 +4,10 @@
 #include <vector>
 #include <queue>
 
-#include "findpath.h"
-
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+
+#include "findpath.h"
 
 class engine
 {
