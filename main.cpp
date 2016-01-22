@@ -14,6 +14,13 @@ engine::engine()
     window.create(sf::VideoMode(640, 640), "EinsteinMan", sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(120);
 
+    sf::Texture icon;
+    if(!icon.loadFromFile("icon.png"))
+    {
+        window.close();
+    }
+    window.setIcon(16, 16, icon.copyToImage().getPixelsPtr());
+
     if(!mapTexture.loadFromFile("map.png"))
     {
         window.close();
