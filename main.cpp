@@ -463,17 +463,17 @@ void engine::render()
     sf::Vector2f originalPosition = enemySprite.getPosition();
     if((enemyMoveX < 0 && currentMoveX > 0) || (enemyMoveX > 0 && currentMoveX < 0))
     {
-        enemySprite.setScale(sf::Vector2f(0.20, 1));
+        enemySprite.setScale(sf::Vector2f(0.78, 1));
         int distance = einsteinSprite.getPosition().x - enemySprite.getPosition().x;
-        enemySprite.move(sf::Vector2f(distance - (distance * 0.20), 0));
+        enemySprite.move(sf::Vector2f(distance - (distance * 0.78), 0));
         window.draw(enemySprite);
         enemySprite.setPosition(originalPosition);
     }
     else if((enemyMoveY < 0 && currentMoveY > 0) || (enemyMoveY > 0 && currentMoveY < 0))
     {
-        enemySprite.setScale(sf::Vector2f(1, 0.20));
+        enemySprite.setScale(sf::Vector2f(1, 0.78));
         int distance = einsteinSprite.getPosition().y - enemySprite.getPosition().y;
-        enemySprite.move(sf::Vector2f(0, distance - (distance * 0.20)));
+        enemySprite.move(sf::Vector2f(0, distance - (distance * 0.78)));
         window.draw(enemySprite);
         enemySprite.setPosition(originalPosition);
     }
